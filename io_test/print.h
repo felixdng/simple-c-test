@@ -10,11 +10,11 @@
 #define USER_PRINT(flag, format, args...) \
 	do { \
 		if (USER_DEBUG & flag) \
-			fprintf(stdout, "[%s] [debug] %s\n", __func__, format, ##args); \
+			fprintf(stdout, "[%s] [debug] : "format"\n", __func__, ##args); \
 		else if (USER_INFO & flag) \
-			fprintf(stdout, "[%s] [info] %s\n", __func__, format, ##args); \
+			fprintf(stdout, "[%s] [info] : "format"\n", __func__, ##args); \
 		else if (USER_ERR & flag) \
-			fprintf(stderr, "[%s] [err] %s\n", __func__, format, ##args); \
+			fprintf(stderr, "[%s] [err] : "format"\n", __func__, ##args); \
 	} while(0)
 
 #endif /* __PRINT_H__ */
