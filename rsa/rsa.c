@@ -3,6 +3,7 @@
  * RSA asymmetric algorithm
  */
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -219,5 +220,162 @@ int_64 DecryptRSA(int_64 pri_n, int_64 pri_d, int_64 data)
 	}
 
 	return tmp;
+}
+
+/************************************************************************************/
+
+/**
+ * 16进制字符转为整数
+ */
+static inline int_64 char_to_num(char ch)
+{
+	int_64 num = 0;
+
+	if (ch >= '0' && ch <= '9')
+		num = ch - '0';
+	else if (ch >= 'a' && ch <= 'f')
+		num = ch - 'a' + 10;
+	else if (ch >= 'A' && ch <= 'F')
+		num = ch - 'A' + 10;
+
+	return num;
+}
+
+/**
+ * 整数转为16进制字符, 字母的用大写字母
+ */
+static inline char num_to_char(int_64 num)
+{
+	char ch = '0';
+
+	if (num >= 0 && num <= 9)
+		ch = '0' + num;
+	else if (num >= 10 && num <= 15)
+		ch = 'A' + (num - 10);
+
+	return ch;
+}
+
+/**
+ * 去掉MD5字符串中的'-'
+ */
+static inline void md5str2num(char *md5str)
+{
+	char tmp[MD5_ARR_SIZE];
+	char *p = NULL;
+	char *q = NULL;
+
+	memcpy(tmp, md5str, MD5_ARR_SIZE);
+	tmp[MD5_ARR_SIZE-1] = '\0';
+
+	p = md5str;
+	q = tmp;
+	while ((*q) != '\0') {
+		if ((*q) != '-')
+			*p++ = *q;
+		q++;
+	}
+	*p = '\0';
+}
+
+/**
+ * 加上MD5字符串中的'-'
+ */
+static inline void md5num2str(char *md5str)
+{
+	char tmp[MD5_ARR_SIZE];
+	char *p = NULL;
+	int i;
+
+	memcpy(tmp, md5str, MD5_ARR_SIZE);
+	tmp[MD5_ARR_SIZE-1] = '\0';
+
+	p = tmp;
+	i = 0;
+	while ((*p) != '\0') {
+		//在8,13,18,23的位置加'-'
+		if (i == 8 || i == 13 || i == 18 || i == 23)
+			md5str[i++] = '-';
+		else
+			md5str[i++] = *p++;
+	}
+	md5str[i] = '\0';
+}
+
+/**
+ * 加密MD5字符串
+ * (pub_n, pub_e) RSA公钥
+ * md5            需要加密的MD5字符串
+ * rsa_str        RSA加密后的密文
+ */
+const char *EncryptRSA_MD5(int_64 pub_n, int_64 pub_e, const char md5[], char rsa_str[])
+{
+	int i, j;
+	int size = strlen(md5) + 1;
+	char md5_str[size];
+
+	strcpy(md5_str, md5);
+
+	//去掉MD5字符串中的'-'
+	md5str2num(md5_str);
+
+	//将MD5字符串拆分成8组
+	int_64 md5_arr[8];
+	for (i = 0; i < 8; i++) {
+		md5_arr[i] = (char_to_num(md5_str[4*i]) << 12) | (char_to_num(md5_str[4*i+1]) << 8) |
+				(char_to_num(md5_str[4*i+2]) << 4) | char_to_num(md5_str[4*i+3]);
+	}
+
+	//对md5_arr进行RSA加密
+	int_64 rsa_arr[8];
+	for (i = 0; i < 8; i++) {
+		rsa_arr[i] = EncryptRSA(pub_n, pub_e, md5_arr[i]);
+	}
+
+	memset(rsa_str, 0, MD5_RSA_SIZE);
+	//将rsa_arr转化成对应的字符
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < 8; j++)
+			rsa_str[8 * i + (7-j)] = num_to_char((rsa_arr[i] >> (4*j)) & 0xf);
+	}
+	rsa_str[MD5_RSA_SIZE-1] = '\0';
+
+	return rsa_str;
+}
+
+/**
+ * 解密MD5字符串
+ * (pri_n, pri_d) RSA私钥
+ * rsa_str        RSA加密的密文
+ * md5_str        解密后的MD5字符串
+ */
+const char *DecryptRSA_MD5(int_64 pri_n, int_64 pri_d, const char rsa_str[], char md5_str[])
+{
+	int i, j;
+	int_64 num_arr[8];
+	int_64 rsa_arr[8];
+
+	for (i = 0; i < 8; i++) {
+		num_arr[i] = 0x0;
+		for (j = 0; j < 8; j++)
+			num_arr[i] |= char_to_num(rsa_str[8 * i + (7-j)]) << (4 * j);
+	}
+
+	//RSA解密
+	for (i = 0; i < 8; i++) {
+		rsa_arr[i] = DecryptRSA(pri_n, pri_d, num_arr[i]);
+	}
+
+	memset(md5_str, 0, MD5_ARR_SIZE);
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < 4; j++)
+			md5_str[4 * i + (3-j)] = num_to_char(rsa_arr[i] >> (4*j) & 0xf);
+	}
+	md5_str[MD5_NUM_SIZE] = '\0';
+
+	//加上MD5字符串中的'-'
+	md5num2str(md5_str);
+
+	return md5_str;
 }
 
