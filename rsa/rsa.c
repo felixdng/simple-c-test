@@ -188,19 +188,32 @@ void GetPrivateKey(int_64 *pri_n, int_64 *pri_d)
  */
 int_64 EncryptRSA(int_64 pub_n, int_64 pub_e, int_64 data)
 {
+#if 0
 	int_64 tmp = data;
 	int_64 i;
 
-	//确保data < pub_n
-	if (data >= pub_n)
-		return -1;
-
+	//data的pub_e次幂对pub_n求余数
 	for (i = 1; i < pub_e; i++) {
 		tmp *= data;
 		tmp = tmp % pub_n;
 	}
 
 	return tmp;
+#else
+	/**
+	 * 快速幂取模算法
+	 */
+	int_64 ret = 1;
+	data = data % pub_n; //防止data比pub_n大
+
+	while (pub_e != 0) {
+		if (pub_e & 1)
+			ret = (ret * data) % pub_n;
+		pub_e >>= 1;
+		data = (data * data) % pub_n;
+	}
+	return ret;
+#endif
 }
 
 /**
@@ -211,6 +224,7 @@ int_64 EncryptRSA(int_64 pub_n, int_64 pub_e, int_64 data)
  */
 int_64 DecryptRSA(int_64 pri_n, int_64 pri_d, int_64 data)
 {
+#if 0
 	int_64 tmp = data;
 	int_64 i;
 
@@ -220,6 +234,21 @@ int_64 DecryptRSA(int_64 pri_n, int_64 pri_d, int_64 data)
 	}
 
 	return tmp;
+#else
+	/**
+	 * 快速幂取模算法
+	 */
+	int ret = 1;
+	data = data % pri_n; //防止data比pri_n大
+
+	while (pri_d != 0) {
+		if (pri_d & 1)
+			ret = (ret * data) % pri_n;
+		pri_d >>= 1;
+		data = (data * data) % pri_n;
+	}
+	return ret;
+#endif
 }
 
 /************************************************************************************/
@@ -265,8 +294,7 @@ static inline void md5str2num(char *md5str)
 	char *p = NULL;
 	char *q = NULL;
 
-	memcpy(tmp, md5str, MD5_ARR_SIZE);
-	tmp[MD5_ARR_SIZE-1] = '\0';
+	strcpy(tmp, md5str);
 
 	p = md5str;
 	q = tmp;
@@ -287,8 +315,7 @@ static inline void md5num2str(char *md5str)
 	char *p = NULL;
 	int i;
 
-	memcpy(tmp, md5str, MD5_ARR_SIZE);
-	tmp[MD5_ARR_SIZE-1] = '\0';
+	strcpy(tmp, md5str);
 
 	p = tmp;
 	i = 0;

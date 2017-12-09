@@ -1,10 +1,12 @@
-#include<stdio.h>  
-#include<stdlib.h>  
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "rsa.h"
 
-extern void md5str2num(char *md5str, int size);
-extern void md5num2str(char *md5str, int size);
+static clock_t start = 0;
+static clock_t finish = 0;
+static double runtimes = 0.0;
 
 int main(int argc, char **argv)
 {
@@ -83,17 +85,24 @@ int main(int argc, char **argv)
 #if 1
 	int_64 key_n, key_e, key_d;
 	char md5[] = "d6173946-1cb5-46ac-bf29-19349f0c44d5";
-	//char md5[] = "f6174";
 	printf("原始数据: %s\n", md5);
 
 	GetPublicKey(&key_n, &key_e); //获取公钥
 	char rsa_str[MD5_RSA_SIZE];
+	start = clock();
 	EncryptRSA_MD5(key_n, key_e, md5, rsa_str);
-	printf("加密后的数据: %s\n", rsa_str);
+	finish = clock();
+	runtimes = (double)(finish - start) / CLOCKS_PER_SEC;
+	printf("start: %ld, finish: %ld, 加密时间: %lf 秒\n", start, finish, runtimes);
+	//printf("加密后的数据: %s\n", rsa_str);
 
 	GetPrivateKey(&key_n, &key_d); //获取私钥
 	char md5_str[MD5_ARR_SIZE];
+	start = clock();
 	DecryptRSA_MD5(key_n, key_d, rsa_str, md5_str);
+	finish = clock();
+	runtimes = (double)(finish - start) / CLOCKS_PER_SEC;
+	printf("start: %ld, finish: %ld, 解密时间: %lf 秒\n", start, finish, runtimes);
 	printf("解密后的数据 : %s\n", md5_str);
 #endif
 
