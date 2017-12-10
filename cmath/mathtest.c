@@ -15,6 +15,12 @@ int main(int argc, char **argv)
 		printf("%s + %s = %s\n", num1, num2, ret);
 		free(ret);
 	}
+
+	ret = minus(num2, num1);
+	if (ret) {
+		printf("%s - %s = %s\n", num2, num1, ret);
+		free(ret);
+	}
 	return 0;
 }
 
