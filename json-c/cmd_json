@@ -1,0 +1,28 @@
+[
+{
+    "cmd_arg" : [
+        "fpga",
+        "test",
+        "cmd1",
+        "get"
+    ],
+    "cmd_exec" : [
+        "echo cmd1-1",
+        "echo cmd1-2",
+        "echo cmd1-3"
+    ],
+    "cmd_type" : "fpga"
+},
+{
+    "cmd_arg" : [
+        "fpga",
+        "test",
+        "cmd2",
+        "set"
+    ],
+    "cmd_exec" : [
+        "echo 'cmd2 OK'"
+    ],
+    "cmd_type" : "fpga"
+}
+]
