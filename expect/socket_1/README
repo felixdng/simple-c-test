@@ -1,0 +1,8 @@
+example:
+service:
+./srv 127.0.0.1 12004
+
+client:
+./cli.sh 127.0.0.1 12004
+
+
