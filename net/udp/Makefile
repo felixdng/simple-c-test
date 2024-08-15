@@ -12,14 +12,14 @@ TARGET =
 OBJS =
 
 #service
-SRCS_SERVICE = service.c
+SRCS_SERVICE = service.c common.c
 OBJS_SERVICE = $(patsubst %.c, %.o, $(SRCS_SERVICE))
 OBJS += $(OBJS_SERVICE)
 TARGET_SERVICE = service
 TARGET += $(TARGET_SERVICE)
 
 #client
-SRCS_CLIENT = client.c
+SRCS_CLIENT = client.c common.c
 OBJS_CLIENT = $(patsubst %.c, %.o, $(SRCS_CLIENT))
 OBJS += $(OBJS_CLIENT)
 TARGET_CLIENT = client
