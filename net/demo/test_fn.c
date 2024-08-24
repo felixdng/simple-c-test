@@ -2,6 +2,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <arpa/inet.h>	
+#include <sys/select.h>
 
 #include "unp.h"
 
@@ -166,11 +167,27 @@ static void addr(void)
 
 }
 
+static void _select(void)
+{
+	fd_set set;
+	FD_ZERO(&set);
+	FD_SET(0, &set);
+	FD_SET(8, &set);
+	FD_SET(16, &set);
+	FD_SET(24, &set);
+	FD_SET(32, &set);
+	FD_SET(40, &set);
+	FD_SET(48, &set);
+	FD_SET(56, &set);
+	FD_SET(128, &set);
+}
+
 int test_fn(int argc, char *argv[])
 {
 	host_net();
 	string();
 	addr();
+	_select();
 
 	return 0;
 }
