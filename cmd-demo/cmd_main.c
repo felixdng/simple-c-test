@@ -58,7 +58,7 @@ static void pr_params(int flag)
 	}
 }
 
-static void handle_params(params_t *params)
+static void handle_params(const params_t *params)
 {
 	if (!params || params->cmd_num <= 0)
 		return;
@@ -80,8 +80,8 @@ static void handle_params(params_t *params)
 	if (!(cmd_idx < cmdlist_num))
 		return;
 
-	printf("handle params: id(%d), cmd(%s)\n", elem->id, elem->name);
-	if (elem->handler) elem->handler(params);
+	printf("handle params: id(%d), cmd(%s), param num(%d)\n", elem->id, elem->name, params->cmd_num - 1);
+	if (elem->handler) elem->handler(elem, params);
 }
 
 int main(int argc, char *argv[])

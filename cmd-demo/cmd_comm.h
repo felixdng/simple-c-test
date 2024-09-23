@@ -18,7 +18,7 @@ typedef struct _params {
 typedef struct _cmd_list {
 	int id;
 	char name[PARAM_LEN];
-	int (*handler)(params_t *param);
+	int (*handler)(const struct _cmd_list *cmd, const params_t *param);
 	void (*help)();
 } cmd_list_t;
 
