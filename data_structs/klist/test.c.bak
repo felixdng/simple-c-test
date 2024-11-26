@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <string.h>
+#include "list.h"
+#include "rbtree.h"
+
+struct ldata {
+	int num;
+	struct list_head list;
+};
+
+static struct ldata array[20];
+static unsigned long aused;
+static const unsigned int asize = sizeof(array) / sizeof(array[0]);
+
+static struct list_head head;
+
+
+//////
+struct student {
+	int id;
+	int score;
+	struct rb_node s_rb;
+};
+
+static void _student_link_rb(struct rb_root *s_root, struct student *stu,
+								struct rb_node **rb_link, struct rb_node *rb_parent)
+{
+	rb_link_node(&stu->s_rb, rb_parent, rb_link);
+	rb_insert_color(&stu->s_rb, s_root);
+}
+
+void add_student(struct rb_root *s_root, struct student *stu)
+{
+	struct rb_node **rb_link, *rb_parent;
+	_student_link_rb(s_root, stu, rb_link, rb_parent);
+}
+
+int main(int argc, char *argv[])
+{
+	memset(array, 0, sizeof(array));
+	aused = 0x0;
+
+	INIT_LIST_HEAD(&head);
+
+	for (int i = 0; i < asize; ++i) {
+		array[i].num = i + 1000;
+		list_add_tail(&array[i].list, &head);
+		aused |= 1UL << i;
+	}
+
+	struct list_head *pos = NULL;
+	list_for_each(pos, &head) {
+		struct ldata *pdata = list_entry(pos, struct ldata, list);
+		if (pdata) {
+			printf("num:%d\n", pdata->num);
+		}
+	}
+	return 0;
+}
+

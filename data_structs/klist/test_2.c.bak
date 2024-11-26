@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "myrbtree.h"
+
+#define KEY_NUM 16
+#define KEY_LEN 32
+static char keys[KEY_NUM][KEY_LEN] = {};
+static struct mytype nodes[KEY_NUM] = {};
+
+int main(int argc, char *argv[])
+{
+	char *endptr = NULL;
+	int ret = strtoul("123", &endptr, 0);
+	unsigned long dig = 0;
+	ret = is_digit_string("4321uyw", dig);
+
+	int key_cnt = argc - 1;
+	if (key_cnt > KEY_NUM)
+		key_cnt = KEY_NUM;
+	if (key_cnt <= 0)
+		key_cnt = 0;
+
+	const char *key_tmp = NULL;
+	struct rb_root mytree = RB_ROOT;
+	if (0 == key_cnt) {
+		for (int i = 0; i < KEY_NUM; ++i) {
+			snprintf(keys[i], KEY_LEN - 1, "%02d-keys", i + 1);
+			if (NULL == key_tmp) key_tmp = keys[i];
+			nodes[i].keystring = keys[i];
+			bool ret = my_insert(&mytree, &nodes[i]);
+			printf("insert ret=%d, key=%s\n", ret, nodes[i].keystring);
+		}
+	} else {
+		for (int i = 0; i < key_cnt; ++i) {
+			snprintf(keys[i], KEY_LEN - 1, "%s", argv[i + 1]);
+			if (NULL == key_tmp) key_tmp = keys[i];
+			nodes[i].keystring = keys[i];
+			bool ret = my_insert(&mytree, &nodes[i]);
+			printf("insert ret=%d, key=%s\n", ret, nodes[i].keystring);
+		}
+	}
+	mytype_print(&mytree, 0);
+
+	//struct mytype *tmp = my_search(&mytree, "keys-3");
+	//if (tmp) printf("search:%s\n", tmp->keystring);
+
+	mytype_preorder(mytree.rb_node);
+
+	if (key_tmp) {
+		printf("\n");
+		my_erase(&mytree, key_tmp);
+		mytype_preorder(mytree.rb_node);
+	}
+	return 0;
+}
